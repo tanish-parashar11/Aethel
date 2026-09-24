@@ -1,25 +1,28 @@
-const featureCards = [
-  {
-    title: 'College hubs',
-    text: 'Topic-based communities built around real student interests and disciplines.',
-  },
-  {
-    title: 'Verified entry',
-    text: 'Admins can require eligibility checks before granting access to sensitive channels.',
-  },
-  {
-    title: 'Public timeline',
-    text: 'Open discovery feed inspired by decentralized social patterns and community activity.',
-  },
-  {
-    title: 'Private DMs',
-    text: 'Secure peer-to-peer communication designed for private student networking.',
-  },
-];
+import { fallbackHubs, fetchJson } from '@/lib/data';
 
-const hubExamples = ['Mathematics', 'Software', 'Public Speaking', 'Research', 'Design', 'Clubs'];
+export default async function HomePage() {
+  const data = await fetchJson<{ hubs: typeof fallbackHubs }>('/hubs');
+  const hubs = data?.hubs ?? fallbackHubs;
 
-export default function HomePage() {
+  const featureCards = [
+    {
+      title: 'College hubs',
+      text: 'Topic-based communities built around real student interests and disciplines.',
+    },
+    {
+      title: 'Verified entry',
+      text: 'Admins can require eligibility checks before granting access to sensitive channels.',
+    },
+    {
+      title: 'Public timeline',
+      text: 'Open discovery feed inspired by decentralized social patterns and community activity.',
+    },
+    {
+      title: 'Private DMs',
+      text: 'Secure peer-to-peer communication designed for private student networking.',
+    },
+  ];
+
   return (
     <main className="page-shell">
       <section className="hero">
@@ -27,19 +30,20 @@ export default function HomePage() {
           <span className="eyebrow">Verified communities for students</span>
           <h1>Where access is earned and knowledge is shared.</h1>
           <p>
-            Aneis helps students discover organized communities, join relevant hubs, and participate in
-            spaces that are gated by trust, skill, and intent.
+            Aneis helps students discover organized communities, join relevant hubs, and participate in spaces
+            that are gated by trust, skill, and intent.
           </p>
           <div className="cta-row">
             <a href="#features" className="primary-btn">Explore platform</a>
-            <a href="#hubs" className="secondary-btn">View hubs</a>
+            <a href="/hubs" className="secondary-btn">View hubs</a>
           </div>
         </div>
+
         <div className="hero-card">
-          <div className="mini-label">Live community map</div>
+          <div className="mini-label">Community snapshot</div>
           <div className="pulse-card">
             <div className="pulse-dot" />
-            <span>12 active hubs</span>
+            <span>{hubs.length} active hubs</span>
           </div>
           <div className="stat-grid">
             <div>
@@ -52,7 +56,7 @@ export default function HomePage() {
             </div>
             <div>
               <strong>64%</strong>
-              <span>verified entry rate</span>
+              <span>verified entry</span>
             </div>
             <div>
               <strong>2.4x</strong>
@@ -62,16 +66,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="hubs" className="hub-section">
+      <section className="hub-section">
         <div className="section-heading">
           <span className="eyebrow">Core hubs</span>
           <h2>Structured spaces for focused student communities</h2>
         </div>
         <div className="hub-list">
-          {hubExamples.map((hub) => (
-            <div key={hub} className="hub-pill">
-              {hub}
-            </div>
+          {hubs.map((hub) => (
+            <a key={hub.slug} href={`/hubs/${hub.slug}`} className="hub-pill">
+              {hub.name}
+            </a>
           ))}
         </div>
       </section>

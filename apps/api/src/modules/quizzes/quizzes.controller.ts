@@ -11,7 +11,7 @@ export class QuizzesController {
   }
 
   @Get(':hubSlug')
-  getQuizForHub(@Param('hubSlug') string) {
+  getQuizForHub(@Param('hubSlug') hubSlug: string) {
     return this.quizzesService.getQuizForHub(hubSlug);
   }
 

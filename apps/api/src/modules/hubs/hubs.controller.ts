@@ -11,7 +11,7 @@ export class HubsController {
   }
 
   @Get(':slug')
-  getHub(@Param('slug') string) {
+  getHub(@Param('slug') slug: string) {
     return this.hubsService.getHubBySlug(slug);
   }
 }

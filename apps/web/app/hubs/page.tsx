@@ -1,21 +1,8 @@
-export default function HubsPage() {
-  const hubs = [
-    {
-      name: 'Mathematics',
-      description: 'Proofs, Olympiad prep, and advanced problem solving.',
-      status: 'Verified access required',
-    },
-    {
-      name: 'Software Engineering',
-      description: 'Projects, system design, internships, and technical discussion.',
-      status: 'Verified access required',
-    },
-    {
-      name: 'Public Speaking',
-      description: 'Debates, speech drills, and storytelling practice.',
-      status: 'Open community',
-    },
-  ];
+import { fallbackHubs, fetchJson } from '@/lib/data';
+
+export default async function HubsPage() {
+  const data = await fetchJson<{ hubs: typeof fallbackHubs }>('/hubs');
+  const hubs = data?.hubs ?? fallbackHubs;
 
   return (
     <main className="page-shell">
@@ -26,10 +13,17 @@ export default function HubsPage() {
 
       <div className="feature-grid">
         {hubs.map((hub) => (
-          <article key={hub.name} className="feature-card">
+          <article key={hub.slug} className="feature-card">
             <h3>{hub.name}</h3>
             <p>{hub.description}</p>
-            <div className="hub-pill" style={{ marginTop: 16 }}>{hub.status}</div>
+            <div className="hub-pill" style={{ marginTop: 16 }}>
+              {hub.verifiedRequired ? 'Verified access required' : 'Open community'}
+            </div>
+            <div style={{ marginTop: 18 }}>
+              <a className="secondary-btn" href={`/hubs/${hub.slug}`}>
+                View hub
+              </a>
+            </div>
           </article>
         ))}
       </div>
