@@ -1,51 +1,20 @@
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  university: string;
-  role: 'student' | 'moderator' | 'admin';
-};
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
+@Injectable()
 export class UsersService {
-  private users: User[] = [
-    {
-      id: 'u_101',
-      name: 'Aisha Khanna',
-      email: 'aisha@college.edu',
-      university: 'NIT Delhi',
-      role: 'student',
-    },
-    {
-      id: 'u_102',
-      name: 'Riya Malhotra',
-      email: 'riya@college.edu',
-      university: 'IIT Bombay',
-      role: 'moderator',
-    },
-  ];
+  constructor(private readonly prisma: PrismaService) {}
 
-  getUsers() {
-    return { users: this.users };
+  findAll() {
+    return this.prisma.user.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
-  getUserById(id: string) {
-    return this.users.find((user) => user.id === id) ?? null;
+  findById(id: string) {
+    return this.prisma.user.findUnique({ where: { id } });
   }
 
-  createUser(payload: { name: string; email: string; university: string }) {
-    const newUser: User = {
-      id: `u_${Date.now()}`,
-      name: payload.name,
-      email: payload.email,
-      university: payload.university,
-      role: 'student',
-    };
-
-    this.users.push(newUser);
-
-    return {
-      message: 'User created successfully',
-      user: newUser,
-    };
+  create(dto: CreateUserDto) {
+    return this.prisma.user.create({ data: dto });
   }
 }

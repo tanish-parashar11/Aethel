@@ -1,49 +1,20 @@
-export type Hub = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  category: string;
-  members: number;
-  verifiedRequired: boolean;
-};
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreateHubDto } from './dto/create-hub.dto';
 
+@Injectable()
 export class HubsService {
-  private hubs: Hub[] = [
-    {
-      id: 'hub_1',
-      name: 'Mathematics',
-      slug: 'mathematics',
-      description: 'Advanced problem solving, olympiad prep, and proofs.',
-      category: 'STEM',
-      members: 1234,
-      verifiedRequired: true,
-    },
-    {
-      id: 'hub_2',
-      name: 'Software Engineering',
-      slug: 'software-engineering',
-      description: 'Projects, internships, and system design discussions.',
-      category: 'STEM',
-      members: 2456,
-      verifiedRequired: true,
-    },
-    {
-      id: 'hub_3',
-      name: 'Public Speaking',
-      slug: 'public-speaking',
-      description: 'Debate, communication, storytelling, and speaking practice.',
-      category: 'Communication',
-      members: 980,
-      verifiedRequired: false,
-    },
-  ];
+  constructor(private readonly prisma: PrismaService) {}
 
-  getHubs() {
-    return { hubs: this.hubs };
-  }
+  findAll() { return this.prisma.hub.findMany({ include: { _count: { select: { members: true } } } }); }
+  findBySlug(slug: string) { return this.prisma.hub.findUnique({ where: { slug }, include: { quizzes: true, _count: { select: { members: true } } } }); }
+  create(dto: CreateHubDto) { return this.prisma.hub.create({ data: { ...dto, verifiedRequired: dto.verifiedRequired ?? true } }); }
 
-  getHubBySlug(slug: string) {
-    return this.hubs.find((hub) => hub.slug === slug) ?? null;
+  async join(hubId: string, userId: string) {
+    return this.prisma.hubMember.upsert({
+      where: { userId_hubId: { userId, hubId } },
+      create: { userId, hubId },
+      update: {},
+    });
   }
 }
