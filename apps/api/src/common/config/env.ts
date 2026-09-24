@@ -1,0 +1,1 @@
+export const env = { port: Number(process.env.API_PORT || 4000), databaseUrl: process.env.DATABASE_URL || '', authMode: process.env.AUTH_MODE || 'development', keycloakUrl: process.env.KEYCLOAK_URL || '' };

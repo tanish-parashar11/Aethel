@@ -1,94 +1,18 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
 enum UserRole { STUDENT MODERATOR ADMIN }
 enum AccessStatus { PENDING PASSED FAILED REVOKED }
-en
 enum HubMemberRole { MEMBER MODERATOR OWNER }
-
-model User {
-  id           String       @id @default(cuid())
-  email        String       @unique
-  name         String
-  university   String?
-  role         UserRole     @default(STUDENT)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  memberships  HubMember[]
-  attempts     QuizAttempt[]
-  grants       AccessGrant[]
-}
-
-model Hub {
-  id              String       @id @default(cuid())
-  name            String
-  slug            String       @unique
-  description     String
-  category        String
-  verifiedRequired Boolean      @default(true)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  members         HubMember[]
-  quizzes         Quiz[]
-  grants          AccessGrant[]
-}
-
-model HubMember {
-  userId   String
-  hubId    String
-  role     HubMemberRole @default(MEMBER)
-  joinedAt DateTime      @default(now())
-  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  hub      Hub           @relation(fields: [hubId], references: [id], onDelete: Cascade)
-  @@id([userId, hubId])
-}
-
-model Quiz {
-  id          String         @id @default(cuid())
-  hubId       String
-  title       String
-  passScore   Int
-  createdAt   DateTime       @default(now())
-  hub         Hub            @relation(fields: [hubId], references: [id], onDelete: Cascade)
-  questions   QuizQuestion[]
-  attempts    QuizAttempt[]
-}
-
-model QuizQuestion {
-  id         String   @id @default(cuid())
-  quizId     String
-  prompt     String
-  options    Json
-  correctIndex Int
-  quiz       Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-}
-
-model QuizAttempt {
-  id        String       @id @default(cuid())
-  userId    String
-  quizId    String
-  answers   Json
-  score     Int
-  status    AccessStatus
-  createdAt DateTime     @default(now())
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quiz      Quiz        @relation(fields: [quizId], references: [id], onDelete: Cascade)
-}
-
-model AccessGrant {
-  id        String       @id @default(cuid())
-  userId    String
-  hubId     String
-  status    AccessStatus @default(PASSED)
-  grantedAt DateTime     @default(now())
-  revokedAt DateTime?
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  hub       Hub         @relation(fields: [hubId], references: [id], onDelete: Cascade)
-  @@unique([userId, hubId])
-}
+enum ReportStatus { OPEN REVIEWING RESOLVED DISMISSED }
+enum NotificationType { SYSTEM HUB QUIZ MODERATION MESSAGE }
+model User { id String @id @default(cuid()) email String @unique name String university String? role UserRole @default(STUDENT) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt memberships HubMember[] attempts QuizAttempt[] grants AccessGrant[] }
+model Hub { id String @id @default(cuid()) name String slug String @unique description String category String verifiedRequired Boolean @default(true) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt members HubMember[] quizzes Quiz[] grants AccessGrant[] }
+model HubMember { userId String hubId String role HubMemberRole @default(MEMBER) joinedAt DateTime @default(now()) user User @relation(fields:[userId],references:[id],onDelete: Cascade) hub Hub @relation(fields:[hubId],references:[id],onDelete: Cascade) @@id([userId,hubId]) }
+model Quiz { id String @id @default(cuid()) hubId String title String passScore Int createdAt DateTime @default(now()) hub Hub @relation(fields:[hubId],references:[id],onDelete: Cascade) questions QuizQuestion[] attempts QuizAttempt[] }
+model QuizQuestion { id String @id @default(cuid()) quizId String prompt String options Json correctIndex Int quiz Quiz @relation(fields:[quizId],references:[id],onDelete: Cascade) }
+model QuizAttempt { id String @id @default(cuid()) userId String quizId String answers Json score Int status AccessStatus createdAt DateTime @default(now()) user User @relation(fields:[userId],references:[id],onDelete: Cascade) quiz Quiz @relation(fields:[quizId],references:[id],onDelete: Cascade) }
+model AccessGrant { id String @id @default(cuid()) userId String hubId String status AccessStatus @default(PASSED) grantedAt DateTime @default(now()) revokedAt DateTime? user User @relation(fields:[userId],references:[id],onDelete: Cascade) hub Hub @relation(fields:[hubId],references:[id],onDelete: Cascade) @@unique([userId,hubId]) }
+model Channel { id String @id @default(cuid()) hubId String name String slug String description String? createdAt DateTime @default(now()) @@unique([hubId,slug]) }
+model Report { id String @id @default(cuid()) reporterId String targetType String targetId String reason String details String? status ReportStatus @default(OPEN) resolvedBy String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model AuditLog { id String @id @default(cuid()) actorId String? action String entityType String entityId String? metadata Json? createdAt DateTime @default(now()) }
+model Notification { id String @id @default(cuid()) userId String type NotificationType title String body String readAt DateTime? createdAt DateTime @default(now()) }
